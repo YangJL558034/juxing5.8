@@ -78,7 +78,7 @@ export const db = new Proxy({} as Database.Database, {
 });
 
 // 初始化数据库表
-function initDatabase(dbInstance: Database.Database) {
+export function initDatabase(dbInstance: Database.Database) {
   // 临时禁用外键约束，避免表创建顺序问题
   dbInstance.pragma('foreign_keys = OFF');
   

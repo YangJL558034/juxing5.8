@@ -3,14 +3,15 @@
  * 运行此脚本确保数据库包含所有必要的字段
  */
 
-import { initDatabase } from './database';
+import { db } from './database';
 
 async function migrate() {
   console.log('开始数据库迁移...');
   
   try {
-    // 初始化数据库（包含表创建和字段迁移）
-    initDatabase();
+    // 访问 db 会自动初始化数据库
+    const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all();
+    console.log(`已存在的表: ${(tables as any[]).map(t => t.name).join(', ')}`);
     
     console.log('数据库迁移完成！');
     console.log('所有必要的字段已添加或确认存在。');
