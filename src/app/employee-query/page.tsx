@@ -76,10 +76,30 @@ interface SalaryRecord {
   location: string;
   bank_account?: string;
   remark?: string;
+  department?: string;
+  employee_code?: string;
   // 办公室格式扣除项
   housing_fund?: number;
   social_insurance?: number;
   social_pension_adj?: number;
+  // 办公室格式考勤字段
+  should_attend_days?: number;
+  saturday_days?: number;
+  actual_attend_days?: number;
+  paid_leave_days?: number;
+  holiday_overtime?: number;
+  holiday_pay?: number;
+  holiday_overtime_pay?: number;
+  // 办公室格式收入字段
+  performance_bonus?: number;
+  meal_subsidy?: number;
+  housing_subsidy?: number;
+  transport_subsidy?: number;
+  other_subsidy?: number;
+  fine?: number;
+  other_deduction?: number;
+  pre_tax_salary?: number;
+  income_tax?: number;
 }
 
 // 获取星期几
@@ -812,7 +832,7 @@ export default function EmployeeQueryPage() {
                 </AccordionContent>
               </AccordionItem>
 
-              {/* 工资 */}
+              {/* 工资 - 新卡片样式 */}
               <AccordionItem value="salary" className="border-0 bg-white rounded-lg shadow px-4 sm:px-6">
                 <AccordionTrigger className="hover:no-underline py-4 sm:py-5">
                   <div className="flex items-center gap-2 sm:gap-3">
@@ -848,107 +868,278 @@ export default function EmployeeQueryPage() {
                     <Button size="default" variant="outline" className="h-9 sm:h-10 text-sm sm:text-base px-4 sm:px-5">查询</Button>
                   </div>
                   
-                  {/* 工资表格 - 21列 */}
+                  {/* 工资卡片列表 */}
                   {filteredSalaryRecords.length === 0 ? (
                     <p className="text-center text-slate-500 py-8 sm:py-10 text-base">暂无工资记录</p>
                   ) : (
-                    <>
-                      <div className="flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm text-slate-400 mb-2 sm:mb-3">
-                        <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
-                        <span>左右滑动查看</span>
-                        <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
-                      </div>
-                      <div className="overflow-x-auto border rounded-lg -mx-4 sm:mx-0">
-                        <table className="text-xs sm:text-sm">
-                          <thead>
-                            <tr className="bg-slate-50 whitespace-nowrap">
-                              <th className="sticky left-0 z-10 bg-slate-50 p-2 sm:p-3 border text-left font-medium">序号</th>
-                              <th className="p-2 sm:p-3 border text-left font-medium">姓名</th>
-                              <th className="p-2 sm:p-3 border text-left font-medium">基础底薪</th>
-                              <th className="p-2 sm:p-3 border text-left font-medium">正班满勤</th>
-                              <th className="p-2 sm:p-3 border text-left font-medium">实际正班</th>
-                              <th className="p-2 sm:p-3 border text-left font-medium">平时加班</th>
-                              <th className="p-2 sm:p-3 border text-left font-medium">周末加班</th>
-                              <th className="p-2 sm:p-3 border text-left font-medium">平时加班费</th>
-                              <th className="p-2 sm:p-3 border text-left font-medium">周末加班费</th>
-                              <th className="p-2 sm:p-3 border text-left font-medium">生活补贴</th>
-                              <th className="p-2 sm:p-3 border text-left font-medium">工龄奖</th>
-                              <th className="p-2 sm:p-3 border text-left font-medium">全勤奖</th>
-                              <th className="p-2 sm:p-3 border text-left font-medium">加班补贴</th>
-                              <th className="p-2 sm:p-3 border text-left font-medium">岗位补贴</th>
-                              <th className="p-2 sm:p-3 border text-left font-medium">社保补贴</th>
-                              <th className="p-2 sm:p-3 border text-left font-medium">应付合计</th>
-                              <th className="p-2 sm:p-3 border text-left font-medium text-red-600">应扣项目</th>
-                              <th className="p-2 sm:p-3 border text-left font-medium">应扣合计</th>
-                              <th className="p-2 sm:p-3 border text-left font-medium">实发金额</th>
-                              <th className="p-2 sm:p-3 border text-left font-medium">银行卡号</th>
-                              <th className="p-2 sm:p-3 border text-left font-medium">备注</th>
-                              <th className="sticky right-0 z-10 bg-slate-50 p-2 sm:p-3 border text-left font-medium min-w-[80px] sm:min-w-[100px]">签字</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {filteredSalaryRecords.map((record, index) => {
-                              // 根据location判断格式，默认办公室
-                              const isOffice = record.location !== '车间';
-                              // 办公室格式：显示公积金、社会保险、社保养老调
-                              // 车间格式：显示扣社保、水电费
-                              return (
-                              <tr key={record.id} className="whitespace-nowrap">
-                                <td className="sticky left-0 z-10 bg-white p-2 sm:p-3 border">{index + 1}</td>
-                                <td className="p-2 sm:p-3 border">{record.employee_name}</td>
-                                <td className="p-2 sm:p-3 border">¥{(record.base_salary || 0).toLocaleString()}</td>
-                                <td className="p-2 sm:p-3 border">{Math.round((record.normal_hours || 0) / 8)}</td>
-                                <td className="p-2 sm:p-3 border">{Math.round((record.normal_hours || 0) / 8)}</td>
-                                <td className="p-2 sm:p-3 border">{record.weekday_overtime || 0}</td>
-                                <td className="p-2 sm:p-3 border">{record.weekend_overtime || 0}</td>
-                                <td className="p-2 sm:p-3 border text-blue-600">¥{(record.weekday_overtime_pay || 0).toLocaleString()}</td>
-                                <td className="p-2 sm:p-3 border text-blue-600">¥{(record.weekend_overtime_pay || 0).toLocaleString()}</td>
-                                <td className="p-2 sm:p-3 border text-blue-600">¥{(record.living_subsidy || 0).toLocaleString()}</td>
-                                <td className="p-2 sm:p-3 border text-blue-600">¥{(record.seniority_award || 0).toLocaleString()}</td>
-                                <td className="p-2 sm:p-3 border text-blue-600">¥{(record.full_attendance_award || 0).toLocaleString()}</td>
-                                <td className="p-2 sm:p-3 border text-blue-600">¥0</td>
-                                <td className="p-2 sm:p-3 border text-blue-600">¥{(record.position_subsidy || 0).toLocaleString()}</td>
-                                <td className="p-2 sm:p-3 border text-blue-600">¥{(record.social_security_subsidy || 0).toLocaleString()}</td>
-                                <td className="p-2 sm:p-3 border text-blue-600 font-semibold">¥{(record.total_payable || 0).toLocaleString()}</td>
-                                <td className="p-2 sm:p-3 border text-red-600">
-                                  {isOffice ? (
-                                    <div className="space-y-1 text-xs">
-                                      {(record.housing_fund || 0) > 0 && <div>公积金: ¥{(record.housing_fund || 0).toLocaleString()}</div>}
-                                      {(record.social_insurance || 0) > 0 && <div>社会保险: ¥{(record.social_insurance || 0).toLocaleString()}</div>}
-                                      {(record.social_pension_adj || 0) > 0 && <div>社保养老调: ¥{(record.social_pension_adj || 0).toLocaleString()}</div>}
-                                      {(record.deduct_social_security || 0) > 0 && <div>扣社保: ¥{(record.deduct_social_security || 0).toLocaleString()}</div>}
-                                      {(record.deduct_utilities || 0) > 0 && <div>水电费: ¥{(record.deduct_utilities || 0).toLocaleString()}</div>}
-                                      {(!record.housing_fund && !record.social_insurance && !record.social_pension_adj && !record.deduct_social_security && !record.deduct_utilities) && <div>¥0</div>}
-                                    </div>
-                                  ) : (
-                                    <div className="space-y-1 text-xs">
-                                      <div>扣社保: ¥{(record.deduct_social_security || 0).toLocaleString()}</div>
-                                      <div>水电费: ¥{(record.deduct_utilities || 0).toLocaleString()}</div>
-                                    </div>
-                                  )}
-                                </td>
-                                <td className="p-2 sm:p-3 border text-red-600 font-semibold">¥{(record.total_deduction || 0).toLocaleString()}</td>
-                                <td className="p-2 sm:p-3 border text-green-600 font-bold">¥{(record.actual_amount || 0).toLocaleString()}</td>
-                                <td className="p-2 sm:p-3 border text-slate-600">{record.bank_account || '-'}</td>
-                                <td className="p-2 sm:p-3 border text-slate-600 whitespace-pre-wrap break-words">{record.remark || '-'}</td>
-                                <td className="sticky right-0 z-10 bg-white p-2 sm:p-3 border">
-                                  {record.signature ? (
-                                    <div className="flex items-center gap-1.5 sm:gap-2">
-                                      <img src={record.signature} alt="签字" className="h-6 sm:h-8 max-w-16 sm:max-w-20 border rounded" />
-                                      <span className="text-xs sm:text-sm text-green-600 font-medium">已签</span>
-                                    </div>
-                                  ) : (
-                                    <Button size="default" variant="outline" className="h-9 sm:h-10 text-sm sm:text-base px-3 sm:px-4 min-w-[60px] sm:min-w-[70px]" onClick={() => openSignDialog(record.id)}>
-                                      签字
-                                    </Button>
-                                  )}
-                                </td>
-                              </tr>
-                            )})}
-                          </tbody>
-                        </table>
-                      </div>
-                    </>
+                    <div className="space-y-4">
+                      {filteredSalaryRecords.map((record) => {
+                        const isOffice = record.location !== '车间';
+                        return (
+                          <div key={record.id} className="bg-white rounded-xl shadow-sm overflow-hidden">
+                            {/* 顶部标题栏 */}
+                            <div className="bg-slate-50 px-4 py-3 flex items-center justify-between">
+                              <div>
+                                <h3 className="font-semibold text-slate-800">山泽{record.year}年{record.month_num}月份工资条</h3>
+                                <p className="text-sm text-slate-500">{record.employee_name}</p>
+                              </div>
+                              <div className={`px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1 ${
+                                record.signature 
+                                  ? 'bg-green-100 text-green-700' 
+                                  : 'bg-gray-100 text-gray-500'
+                              }`}>
+                                {record.signature && <span className="text-green-600">✓</span>}
+                                {record.signature ? '已确认' : '待确认'}
+                              </div>
+                            </div>
+                            
+                            <div className="px-4 py-2 text-xs text-slate-400 border-b">
+                              请及时确认 如有疑问请联系财务部
+                            </div>
+                            
+                            {/* 基础信息 */}
+                            <div className="p-4 space-y-2 border-b border-slate-100">
+                              <div className="flex justify-between text-sm">
+                                <span className="text-slate-500">序号</span>
+                                <span className="text-slate-800">{record.id}</span>
+                              </div>
+                              <div className="flex justify-between text-sm">
+                                <span className="text-slate-500">代码</span>
+                                <span className="text-slate-800">{record.employee_code || '-'}</span>
+                              </div>
+                              <div className="flex justify-between text-sm">
+                                <span className="text-slate-500">部门</span>
+                                <span className="text-slate-800">{record.department || '-'}</span>
+                              </div>
+                              {record.base_salary > 0 && (
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-slate-500">基本工资</span>
+                                  <span className="text-slate-800">¥{record.base_salary?.toLocaleString() ?? "0"}</span>
+                                </div>
+                              )}
+                            </div>
+                            
+                            {/* 考勤记录 */}
+                            <div className="p-4 border-b border-slate-100">
+                              <p className="text-xs text-slate-400 mb-3">考勤记录</p>
+                              <div className="space-y-2">
+                                {(record.should_attend_days ?? 0) > 0 && (
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-slate-500">正班应出勤天数</span>
+                                    <span className="text-slate-800">{record.should_attend_days}天</span>
+                                  </div>
+                                )}
+                                {(record.saturday_days ?? 0) > 0 && (
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-slate-500">当月周六天数</span>
+                                    <span className="text-slate-800">{record.saturday_days}天</span>
+                                  </div>
+                                )}
+                                {(record.actual_attend_days ?? 0) > 0 && (
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-slate-500">正班实际出勤天数</span>
+                                    <span className="text-slate-800">{record.actual_attend_days}天</span>
+                                  </div>
+                                )}
+                                {(record.paid_leave_days ?? 0) > 0 && (
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-slate-500">本月已休带薪假</span>
+                                    <span className="text-slate-800">{record.paid_leave_days}天</span>
+                                  </div>
+                                )}
+                                {(record.weekday_overtime ?? 0) > 0 && (
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-slate-500">平时加班时间</span>
+                                    <span className="text-slate-800">{record.weekday_overtime}小时</span>
+                                  </div>
+                                )}
+                                {(record.weekend_overtime ?? 0) > 0 && (
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-slate-500">周未加班时间</span>
+                                    <span className="text-slate-800">{record.weekend_overtime}天</span>
+                                  </div>
+                                )}
+                                {(record.holiday_overtime ?? 0) > 0 && (
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-slate-500">法定日加班</span>
+                                    <span className="text-slate-800">{record.holiday_overtime}天</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            
+                            {/* 基本工资+补贴项目 */}
+                            <div className="p-4 border-b border-slate-100">
+                              <p className="text-xs text-slate-400 mb-3">基本工资+补贴项目</p>
+                              <div className="space-y-2">
+                                {(record.normal_pay ?? 0) > 0 && (
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-slate-500">实际出勤工资</span>
+                                    <span className="text-blue-600 font-medium">¥{(record.normal_pay ?? 0).toLocaleString()}</span>
+                                  </div>
+                                )}
+                                {(record.holiday_pay ?? 0) > 0 && (
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-slate-500">本月法定日休假工资</span>
+                                    <span className="text-blue-600 font-medium">¥{(record.holiday_pay ?? 0).toLocaleString()}</span>
+                                  </div>
+                                )}
+                                {(record.weekday_overtime_pay ?? 0) > 0 && (
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-slate-500">平时加班工资</span>
+                                    <span className="text-blue-600 font-medium">¥{record.weekday_overtime_pay?.toLocaleString() ?? "0"}</span>
+                                  </div>
+                                )}
+                                {(record.weekend_overtime_pay ?? 0) > 0 && (
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-slate-500">周未加班工资</span>
+                                    <span className="text-blue-600 font-medium">¥{record.weekend_overtime_pay?.toLocaleString() ?? "0"}</span>
+                                  </div>
+                                )}
+                                {(record.holiday_overtime_pay ?? 0) > 0 && (
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-slate-500">法定日加班工资</span>
+                                    <span className="text-blue-600 font-medium">¥{record.holiday_overtime_pay?.toLocaleString() ?? "0"}</span>
+                                  </div>
+                                )}
+                                {(record.performance_bonus ?? 0) > 0 && (
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-slate-500">绩效奖金</span>
+                                    <span className="text-blue-600 font-medium">¥{record.performance_bonus?.toLocaleString() ?? "0"}</span>
+                                  </div>
+                                )}
+                                {(record.meal_subsidy ?? 0) > 0 && (
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-slate-500">用餐补贴</span>
+                                    <span className="text-blue-600 font-medium">¥{(record.meal_subsidy ?? 0).toLocaleString()}</span>
+                                  </div>
+                                )}
+                                {(record.housing_subsidy ?? 0) > 0 && (
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-slate-500">住房补贴</span>
+                                    <span className="text-blue-600 font-medium">¥{record.housing_subsidy?.toLocaleString() ?? "0"}</span>
+                                  </div>
+                                )}
+                                {(record.transport_subsidy ?? 0) > 0 && (
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-slate-500">交通补贴</span>
+                                    <span className="text-blue-600 font-medium">¥{(record.transport_subsidy ?? 0).toLocaleString()}</span>
+                                  </div>
+                                )}
+                                {(record.other_subsidy ?? 0) > 0 && (
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-slate-500">补贴</span>
+                                    <span className="text-blue-600 font-medium">¥{record.other_subsidy?.toLocaleString() ?? "0"}</span>
+                                  </div>
+                                )}
+                                {/* 应领工资 */}
+                                {(record.total_payable ?? 0) > 0 && (
+                                  <div className="flex justify-between text-sm font-semibold border-t border-slate-100 pt-2 mt-2">
+                                    <span className="text-slate-700">应领工资</span>
+                                    <span className="text-blue-600">¥{record.total_payable?.toLocaleString() ?? "0"}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            
+                            {/* 应扣项目 */}
+                            <div className="p-4 border-b border-slate-100">
+                              <p className="text-xs text-slate-400 mb-3">应扣项目</p>
+                              <div className="space-y-2">
+                                {(record.housing_fund ?? 0) > 0 && (
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-slate-500">公积金</span>
+                                    <span className="text-red-500">¥{(record.housing_fund ?? 0).toLocaleString()}</span>
+                                  </div>
+                                )}
+                                {(record.social_insurance ?? 0) > 0 && (
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-slate-500">社会保险</span>
+                                    <span className="text-red-500">¥{record.social_insurance?.toLocaleString() ?? "0"}</span>
+                                  </div>
+                                )}
+                                {(record.social_pension_adj ?? 0) > 0 && (
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-slate-500">社保养老调</span>
+                                    <span className="text-red-500">¥{record.social_pension_adj?.toLocaleString() ?? "0"}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            
+                            {/* 底部汇总 */}
+                            <div className="p-4 bg-slate-50">
+                              <div className="space-y-2">
+                                {(record.social_security_subsidy ?? 0) > 0 && (
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-slate-500">社保补贴</span>
+                                    <span className="text-blue-600 font-medium">¥{(record.social_security_subsidy ?? 0).toLocaleString()}</span>
+                                  </div>
+                                )}
+                                {(record.pre_tax_salary ?? 0) > 0 && (
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-slate-500">税前工资</span>
+                                    <span className="text-slate-800">¥{record.pre_tax_salary?.toLocaleString() ?? "0"}</span>
+                                  </div>
+                                )}
+                                {(record.income_tax ?? 0) > 0 && (
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-slate-500">个人所得税</span>
+                                    <span className="text-red-500">¥{(record.income_tax ?? 0).toLocaleString()}</span>
+                                  </div>
+                                )}
+                                {/* 实发工资 */}
+                                {(record.actual_amount ?? 0) > 0 && (
+                                  <div className="flex justify-between text-base font-bold border-t border-slate-200 pt-2 mt-2">
+                                    <span className="text-slate-800">实发工资</span>
+                                    <span className="text-green-600">¥{record.actual_amount?.toLocaleString() ?? "0"}</span>
+                                  </div>
+                                )}
+                                {/* 银行卡号 */}
+                                {record.bank_account && (
+                                  <div className="flex justify-between text-sm mt-3">
+                                    <span className="text-slate-500">银行卡号</span>
+                                    <span className="text-slate-700 text-right max-w-[60%] break-all">{record.bank_account}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            
+                            {/* 签字区域 */}
+                            <div className="px-4 py-3 border-t flex items-center justify-between">
+                              {record.signature ? (
+                                <div className="flex items-center gap-3">
+                                  <img src={record.signature} alt="签字" className="h-12 border rounded" />
+                                  <div className="text-xs text-slate-400">
+                                    <p>已签字确认</p>
+                                    {record.signature_time && <p>{new Date(record.signature_time).toLocaleDateString()}</p>}
+                                  </div>
+                                </div>
+                              ) : (
+                                <>
+                                  <p className="text-xs text-slate-400">请在下方画板签名确认工资明细</p>
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline" 
+                                    onClick={() => openSignDialog(record.id)}
+                                    className="h-8 text-xs"
+                                  >
+                                    签字确认
+                                  </Button>
+                                </>
+                              )}
+                            </div>
+                            
+                            {/* 备注 */}
+                            {record.remark && (
+                              <div className="px-4 py-2 bg-amber-50 border-t border-amber-100">
+                                <p className="text-xs text-amber-700">备注：{record.remark}</p>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
                   )}
                 </AccordionContent>
               </AccordionItem>
