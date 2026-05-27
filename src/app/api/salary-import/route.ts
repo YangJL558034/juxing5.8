@@ -33,6 +33,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '文件不存在' }, { status: 400 });
     }
 
+    // location 映射：前端值 -> 数据库值
+    const locationMap: Record<string, string> = {
+      '办公室': 'office',
+      '车间': '车间'
+    };
+    const dbLocation = locationMap[location] || location;
+
     // 读取 Excel 文件
     const fileBuffer = await readFile(filePath);
     const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
@@ -147,11 +154,11 @@ export async function POST(request: NextRequest) {
         };
 
         // 查找员工，只导入已存在的员工（且部门/地点匹配）
-        let employee = db.prepare('SELECT * FROM employees WHERE name = ? AND location = ?').get(name, location) as any;
+        let employee = db.prepare('SELECT * FROM employees WHERE name = ? AND location = ?').get(name, dbLocation) as any;
         
         if (!employee) {
           // 员工不存在或部门不匹配，跳过此记录
-          console.log(`员工不存在或部门不匹配(location=${location})，跳过: ${name}`);
+          console.log(`员工不存在或部门不匹配(location=${dbLocation})，跳过: ${name}`);
           skippedEmployees.push(name);
           continue;
         }
@@ -190,7 +197,7 @@ export async function POST(request: NextRequest) {
             name, 
             normalHours, record.weekdayOvertime, record.weekendOvertime,
             record.baseSalary, record.normalPay, record.weekdayOvertimePay, record.weekendOvertimePay,
-            record.totalPayable, record.socialInsurance + record.housingFund, record.actualAmount, location || '办公室',
+            record.totalPayable, record.socialInsurance + record.housingFund, record.actualAmount, dbLocation,
             normalHours + record.weekdayOvertime, record.weekdayOvertime,
             record.performanceBonus, record.mealSubsidy, record.housingSubsidy + record.transportSubsidy,
             record.utilities, record.socialInsurance + record.housingFund,
@@ -227,7 +234,7 @@ export async function POST(request: NextRequest) {
             normalHours + record.weekdayOvertime, record.weekdayOvertime, record.weekendOvertime,
             JSON.stringify({ remark: record.remark }), name, year, month, normalHours, record.weekdayOvertime,
             record.baseSalary, record.normalPay, record.weekdayOvertimePay, record.weekendOvertimePay,
-            record.totalPayable, record.socialInsurance + record.housingFund, record.actualAmount, location || '办公室',
+            record.totalPayable, record.socialInsurance + record.housingFund, record.actualAmount, dbLocation,
             record.performanceBonus, record.mealSubsidy, record.housingSubsidy + record.transportSubsidy,
             record.utilities, record.socialInsurance + record.housingFund,
             record.bankAccount, record.performanceBonus, record.holidayOvertimePay,
@@ -315,11 +322,11 @@ export async function POST(request: NextRequest) {
         };
 
         // 查找员工，只导入已存在的员工（且部门/地点匹配）
-        let employee = db.prepare('SELECT * FROM employees WHERE name = ? AND location = ?').get(name, location) as any;
+        let employee = db.prepare('SELECT * FROM employees WHERE name = ? AND location = ?').get(name, dbLocation) as any;
         
         if (!employee) {
           // 员工不存在或部门不匹配，跳过此记录
-          console.log(`员工不存在或部门不匹配(location=${location})，跳过: ${name}`);
+          console.log(`员工不存在或部门不匹配(location=${dbLocation})，跳过: ${name}`);
           skippedEmployees.push(name);
           continue;
         }
@@ -354,7 +361,7 @@ export async function POST(request: NextRequest) {
             name, 
             record.normalHours, record.weekdayOvertime, record.weekendOvertime,
             record.baseSalary, record.normalPay, record.weekdayOvertimePay, record.weekendOvertimePay,
-            record.totalPayable, record.totalDeduction, record.actualAmount, location || '车间',
+            record.totalPayable, record.totalDeduction, record.actualAmount, dbLocation,
             record.normalHours + record.weekdayOvertime, record.weekdayOvertime,
             record.isFullAttendance, record.idCard, record.bankAccount, record.bankName,
             record.performanceAllowance, record.otherSubsidy, record.requiredHours, record.normalFullAttendance,
@@ -393,7 +400,7 @@ export async function POST(request: NextRequest) {
             record.normalHours + record.weekdayOvertime, record.weekdayOvertime, record.weekendOvertime,
             '{}', name, year, month, record.normalHours, record.weekdayOvertime,
             record.baseSalary, record.normalPay, record.weekdayOvertimePay, record.weekendOvertimePay,
-            record.totalPayable, record.totalDeduction, record.actualAmount, location || '车间',
+            record.totalPayable, record.totalDeduction, record.actualAmount, dbLocation,
             record.isFullAttendance, record.idCard, record.bankAccount, record.bankName,
             record.performanceAllowance, record.otherSubsidy, record.requiredHours, record.normalFullAttendance,
             record.holidayOvertime, record.nightShift, record.absentDays,
