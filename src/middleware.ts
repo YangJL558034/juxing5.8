@@ -3,9 +3,8 @@ import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
   const response = NextResponse.next();
-  const allowedOrigins = ['http://localhost:5000', 'http://127.0.0.1:5000', 'http://shanze.hppro1.hpnu.cn'];
   const origin = request.headers.get('origin');
-  if (origin && allowedOrigins.includes(origin)) {
+  if (origin) {
     response.headers.set('Access-Control-Allow-Origin', origin);
     response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
