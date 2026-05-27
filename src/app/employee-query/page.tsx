@@ -1096,6 +1096,18 @@ export default function EmployeeQueryPage() {
                                     <span className="text-red-500">¥{(record.income_tax ?? 0).toLocaleString()}</span>
                                   </div>
                                 )}
+                                {(record.fine ?? 0) !== 0 && (
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-slate-500">扣款</span>
+                                    <span className="text-red-500">¥{Math.abs(record.fine ?? 0).toLocaleString()}</span>
+                                  </div>
+                                )}
+                                {(record.other_deduction ?? 0) !== 0 && (
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-slate-500">其他扣款</span>
+                                    <span className="text-red-500">¥{Math.abs(record.other_deduction ?? 0).toLocaleString()}</span>
+                                  </div>
+                                )}
                                 {/* 实发工资 */}
                                 {(record.actual_amount ?? 0) > 0 && (
                                   <div className="flex justify-between text-base font-bold border-t border-slate-200 pt-2 mt-2">
